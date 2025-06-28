@@ -1,5 +1,6 @@
 package ru.vopros.shift.data.di
 
+import androidx.room.Room
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -9,11 +10,14 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
-import ru.vopros.shift.data.repository.UserRepositoryImpl
+import ru.vopros.shift.data.repository.LocalUserRepositoryImpl
+import ru.vopros.shift.data.repository.RemoteUserRepositoryImpl
 import ru.vopros.shift.data.retrofit.UserApi
+import ru.vopros.shift.data.room.AppDatabase
 import ru.vopros.shift.domain.Constants
 import ru.vopros.shift.domain.Constants.APPLICATION_JSON
-import ru.vopros.shift.domain.repository.UserRepository
+import ru.vopros.shift.domain.repository.LocalUserRepository
+import ru.vopros.shift.domain.repository.RemoteUserRepository
 
 private val retrofit = module {
     single<Json> {
@@ -47,13 +51,25 @@ private val retrofit = module {
     }
 }
 
+private val room = module {
+    single {
+        Room.databaseBuilder(
+            context = get(),
+            klass = AppDatabase::class.java,
+            name = AppDatabase.NAME
+        ).build()
+    }
+}
+
 private val repository = module {
-    singleOf(::UserRepositoryImpl) { bind<UserRepository>() }
+    singleOf(::RemoteUserRepositoryImpl) { bind<RemoteUserRepository>() }
+    singleOf(::LocalUserRepositoryImpl) { bind<LocalUserRepository>() }
 }
 
 internal val dataModule = module {
     includes(
         retrofit,
+        room,
         repository
     )
 }

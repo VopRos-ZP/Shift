@@ -1,8 +1,8 @@
-package ru.vopros.shift.presentation.screen.root
+package ru.vopros.shift.presentation.screen.list
 
 import ru.vopros.shift.domain.model.User
 
-data class RootViewState(
+data class ListViewState(
     val isLoading: Boolean = false,
     val users: List<User> = emptyList(),
 )
